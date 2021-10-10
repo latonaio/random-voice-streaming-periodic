@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta carset="UTF-8">
+	<title></title>
+</head>
+
+<body>
+	<script>
+		let ws = new WebSocket('ws://localhost:30104/websocket');
+		let ctx = new (window.AudioContext || window.webkitAudioContext);
+		let gainNode = ctx.createGain();
+		gainNode.gain.value = 0.1;
+		let initial_delay_sec = 0;
+		let scheduled_time = 0;
+
+		function playChunk(audio_src, scheduled_time) {
+			if (audio_src.start) {
+				audio_src.start(scheduled_time);
+			} else {
+				audio_src.noteOn(scheduled_time);
+			}
+		}
+
+		function playAudioStream(audio_i16) {
+			//console.log(audio_i16.length);
+			let length = audio_i16.length;
+			let audio_buf = ctx.createBuffer(2, length, 88200);
+			let audio_src = ctx.createBufferSource();
+			let current_time = ctx.currentTime;
+
+			for (let channel = 0; channel < 2; ++channel) {
+				channelBuffer = audio_buf.getChannelData(channel);
+				for (let i = 0; i < length; ++i) {
+					channelBuffer[i] = audio_i16[i] / 32767
+				}
+			}
+
+			audio_src.buffer = audio_buf;
+			audio_src.connect(ctx.destination);
+
+			if (current_time < scheduled_time) {
+				playChunk(audio_src, scheduled_time);
+				scheduled_time += audio_buf.duration;
+			} else {
+				playChunk(audio_src, current_time);
+				scheduled_time = current_time + audio_buf.duration + initial_delay_sec;
+			}
+		}
+
+		ws.binaryType = 'arraybuffer';
+
+		ws.onopen = function () {
+			console.log('open');
+			ws.send("test1");
+		};
+
+		ws.onerror = function (e) {
+			console.log(String(e));
+		};
+
+		ws.onmessage = function (evt) {
+			//console.log(evt);
+			if (evt.data.constructor !== ArrayBuffer) throw 'excepting ArrayBuffer';
+			playAudioStream(new Int16Array(evt.data));
+		};
+
+	</script>
+</body>
+
+</html>
