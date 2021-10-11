@@ -1,18 +1,19 @@
 # random-voice-streaming-periodic  
-random-voice-streaming-periodicは、音声データを定期的にストリーミングするマイクロサービスです。
+random-voice-streaming-periodicは、ランダムに選択された音声データを定期的にストリーミングするマイクロサービスです。
 
 ## 概要  
 random-voice-streaming-periodicは、HTTPリクエストが送られると、動作します。     
-送信されたリクエストのエンドポイントごとに、別のフォルダから音声ファイル(.mp3)が1つ選択され、そのデータをストリーミングします。    
+送信されたリクエストのエンドポイントごとに、別のフォルダからランダムに音声ファイル(.mp3)が1つ選択され、そのデータをストリーミングします。    
+たとえば、  
 -  `/audio_hook/face`というリクエストが送られた際は、`FACE_DETECT_AUDIOS_PATH`で設定したフォルダ内から、    
 -  `/audio_hook/noface`というリクエストが送られた際は、`NO_FACE_DETECT_AUDIOS_PATH`で設定したフォルダ内から、   
-ファイルを1つ選択して音声を再生します。   
+ランダムにファイルを1つ選択して音声を再生します。   
 
 ## 動作環境
-random-voice-streaming-periodicは、kubernetes上での動作を前提としています。以下の環境が必要となります。        
+random-voice-streaming-periodicは、Kubernetes上での動作を前提としています。以下の環境が必要となります。        
 * OS: Linux OS   
 * CPU: ARM/AMD/Intel   
-* AION/Kubernetes   
+* Kubernetes/AION   
 
 ## セットアップ
 1. このリポジトリをクローンする
@@ -90,7 +91,7 @@ $ mkdir voice-resources/no-face-audios
 
 ## I/O
 ### input
-なし
+* 特定のHTTPリクエスト（定期的なもの）
 
 ### output
-* 音声データを、ストリーミングする。
+* ランダム選択された音声データを、ストリーミングする。
